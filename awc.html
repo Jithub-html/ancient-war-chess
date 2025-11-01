@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>古代战旗</title>
+<style>
+body {
+  background: radial-gradient(circle at center, #f5e6ca 0%, #d9b77b 80%);
+  font-family: "KaiTi", serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Title */
+h1 {
+  font-size: 64px;
+  margin: 40px 0 10px 0;
+  color: #3a1e00;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+  letter-spacing: 6px;
+}
+
+/* Return button */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #f7e4a8;
+  border: 3px solid #5b3a00;
+  border-radius: 12px;
+  padding: 10px 22px;
+  font-family: "KaiTi", serif;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.25);
+}
+.back-btn:hover {
+  background: #ffe89c;
+  transform: scale(1.05);
+}
+
+/* Board */
+#board {
+  position: relative;
+  width: 660px;
+  height: 720px;
+  border: 6px solid #5a3a1a;
+  background: linear-gradient(to bottom, #f8ecce, #e1c58f);
+  margin-top: 20px;
+  box-shadow: 0 0 25px rgba(0,0,0,0.3);
+  border-radius: 10px;
+}
+
+/* Grid lines */
+.hline, .vline { position: absolute; background: #000; }
+.hline { height: 1px; left: 30px; right: 30px; }
+.vline { width: 1px; }
+
+/* Intersections */
+.intersection {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  margin-top: -18px;
+  cursor: pointer;
+  z-index: 5;
+}
+.intersection:hover::after {
+  content: "";
+  position: absolute;
+  width: 67px;
+  height: 67px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(128,128,128,0.3);
+  border-radius: 50%;
+}
+
+/* Pieces */
+.piece {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  margin-left: -24px;
+  margin-top: -24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 30%, #fffaf0, #e8c888);
+  border: 2px solid #5b3a00;
+  font-weight: bold;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 10;
+  font-family: "KaiTi", serif;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+}
+.piece:hover { transform: scale(1.20); box-shadow: 0 6px 18px rgba(0,0,0,0.33); }
+.red { color: #b22; }
+.black { color: #222; }
+.selected {
+  outline: 1mm solid black;
+  box-shadow: 0 0 12px #c8a200; transform:scale(1.20); }
+}
+/* river */
+.river {
+  position: absolute;
+  top: 360px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 24px;
+  color: #654321;
+  pointer-events: none;
+  letter-spacing: 10px;
+}
+</style>
+</head>
+
+<body>
+<button class="back-btn" onclick="location.href='homepage.html'">返回主页</button>
+<h1>古代战棋</h1>
+<div id="board"></div>
+
+<script>
+const boardEl = document.getElementById("board"),
+      s = 60, o = 30;
+let turn = "r", sel = null;
+let cols = 11, rows = 12;
+
+let board = [ 
+  ["bR","bN","bE","bH","bA","bK","bA","bH","bE","bN","bR"],
+  ["","bM","","","","","","","","bM",""], 
+  ["","","","","","","","","","",""], 
+  ["","bJ","","bS","","bJ","","bS","","bJ",""], 
+  ["bP","bP","","bP","bP","bP","bP","bP","","bP","bP"], 
+  ["","","","","","","","","","",""], 
+  ["","","","","","","","","","",""], 
+  ["rP","rP","","rP","rP","rP","rP","rP","","rP","rP"], 
+  ["","rJ","","rS","","rJ","","rS","","rJ",""], 
+  ["","","","","","","","","","",""], 
+  ["","rM","","","","","","","","rM",""], 
+  ["rR","rN","rE","rH","rA","rK","rA","rH","rE","rN","rR"] 
+];
+
+const sym = {
+  rK:"帥", bK:"將",
+  rA:"仕", bA:"士",
+  rE:"相", bE:"象",
+  rN:"傌", bN:"馬",
+  rR:"俥", bR:"車",
+  rJ:"剑", bJ:"剑",
+  rP:"兵", bP:"卒",
+  rS:"军", bS:"军",
+  rM:"炮", bM:"炮",
+  rH:"虎", bH:"狮"
+};
+
+function drawGrid() {
+  // horizontal lines
+  for (let r = 0; r < rows; r++) {
+    const y = o + r * s;
+    const h = document.createElement("div");
+    h.className = "hline";
+    h.style.top = y + "px";
+    if (r !== 5 && r !== 6) {
+      h.style.left = "30px";
+      h.style.right = "30px";
+    }
+    boardEl.appendChild(h);
+  }
+
+  // vertical lines
+  for (let c = 0; c < cols; c++) {
+    const x = o + c * s;
+    const v = document.createElement("div");
+    v.className = "vline";
+    v.style.left = x + "px";
+    if (c === 0 || c === cols - 1) {
+      v.style.top = o + "px";
+      v.style.height = (rows - 1) * s + "px";
+    } else {
+      v.style.top = o + "px";
+      v.style.height = 5 * s + "px";
+      const v2 = v.cloneNode();
+      v2.style.top = (o + 6 * s) + "px";
+      v2.style.height = 5 * s + "px";
+      boardEl.appendChild(v2);
+    }
+    boardEl.appendChild(v);
+  }
+
+  // palaces
+  const palaceTop = document.createElement("div");
+  palaceTop.className = "palace";
+  palaceTop.style.left = (o + 4 * s) + "px";
+  palaceTop.style.top = o + "px";
+  boardEl.appendChild(palaceTop);
+
+  const palaceBottom = document.createElement("div");
+  palaceBottom.className = "palace";
+  palaceBottom.style.left = (o + 4 * s) + "px";
+  palaceBottom.style.top = (o + (rows - 4) * s) + "px";
+  boardEl.appendChild(palaceBottom);
+
+  // river
+  const river = document.createElement("div");
+  river.className = "river";
+  river.textContent = "楚河              汉界";
+  boardEl.appendChild(river);
+
+  // intersections
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const i = document.createElement("div");
+      i.className = "intersection";
+      i.style.left = (o + c * s) + "px";
+      i.style.top = (o + r * s) + "px";
+      i.onclick = () => clickPos(r, c);
+      boardEl.appendChild(i);
+    }
+  }
+}
+
+function drawPieces() {
+  document.querySelectorAll(".piece").forEach(e => e.remove());
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const p = board[r][c];
+      if (!p) continue;
+      const e = document.createElement("div");
+      e.className = "piece " + (p[0] === "r" ? "red" : "black");
+      e.textContent = sym[p];
+      e.style.left = (o + c * s) + "px";
+      e.style.top = (o + r * s) + "px";
+      if (sel && sel[0] === r && sel[1] === c) e.classList.add("selected");
+      e.onclick = ev => { ev.stopPropagation(); clickPos(r, c); };
+      boardEl.appendChild(e);
+    }
+  }
+}
+
+function clickPos(r, c) {
+  const p = board[r][c];
+  if (sel) {
+    const [sr, sc] = sel, sp = board[sr][sc];
+    if (p && p[0] === sp[0]) { sel = [r, c]; drawPieces(); return; }
+    if (move(sr, sc, r, c, sp)) { turn = (turn === "r" ? "b" : "r"); sel = null; }
+    else sel = null;
+  } else if (p && p[0] === turn) sel = [r, c];
+  drawPieces();
+}
+
+function move(sr, sc, r, c, p) {
+  if (!valid(sr, sc, r, c, p)) return false;
+  if (board[r][c] && board[r][c][1] === "K") alert((p[0] === "r" ? "红方" : "黑方") + "赢了！");
+  board[r][c] = p;
+  board[sr][sc] = "";
+  return true;
+}
+
+function valid(sr, sc, r, c, p) {
+  if (board[r][c] && board[r][c][0] === p[0]) return false;
+  const dr = r - sr, dc = c - sc, ar = Math.abs(dr), ac = Math.abs(dc);
+  const color = p[0], type = p[1];
+
+  function clearPath(sr, sc, r, c) {
+    if (sr === r) {
+      const step = sc < c ? 1 : -1;
+      for (let i = sc + step; i !== c; i += step) if (board[sr][i]) return false;
+    } else if (sc === c) {
+      const step = sr < r ? 1 : -1;
+      for (let i = sr + step; i !== r; i += step) if (board[i][sc]) return false;
+    } else return false;
+    return true;
+  }
+  function endGame(color) {
+  const winner = color === "r" ? "红方胜利！" : "黑方胜利！";
+  const end = document.getElementById("end-screen");
+  end.innerHTML = `<div>${winner}</div><button onclick="location.reload()">再来一局</button>`;
+  end.style.display = "flex";
+}
+  switch (type) {
+    case "R": return (sr === r || sc === c) && clearPath(sr, sc, r, c);
+    case "K": return ar <= 1 && ac <= 1;
+    case "N":
+  // allow L-shape (2+1)
+  if ((ar === 2 && ac === 1) || (ar === 1 && ac === 2)) return true;
+  // allow 2-step straight moves
+  if ((ar === 2 && ac === 0) || (ar === 0 && ac === 2)) return true;
+  return false;
+    case "E":
+  // Normal elephant move (田)
+  if (ar === 2 && ac === 2) {
+    const eyeR = sr + dr / 2, eyeC = sc + dc / 2;
+    if (board[eyeR][eyeC]) return false;
+    if (color === "r" && r < 5) return false;
+    if (color === "b" && r > 6) return false;
+    return true;
+  }
+  // ✅ Extra rule: allow 2-step straight moves
+  if ((ar === 2 && ac === 0) || (ar === 0 && ac === 2)) {
+    const midR = sr + dr / 2, midC = sc + dc / 2;
+    if (board[midR][midC]) return false;
+    return true;
+  }
+  return false;
+    case "A": if (!(sr === r || sc === c || ar === ac)) return false;
+      const stepR = dr === 0 ? 0 : dr / ar;
+      const stepC = dc === 0 ? 0 : dc / ac;
+      let cr = sr + stepR, cc = sc + stepC;
+      while (cr !== r || cc !== c) {
+        if (board[cr][cc]) return false;
+        cr += stepR; cc += stepC;
+      }
+      return true;
+    case "P":
+      const fwd = color === "r" ? -1 : 1;
+      const crossed = color === "r" ? sr <= 5 : sr >= 6;
+      if (!crossed) return dc === 0 && dr === fwd;
+      return (ar + ac === 1) && !(dr === -fwd);
+    case "H":
+      if (ar <= 2 && ac <= 2 && (ar !== 0 || ac !== 0)) return true;
+      if ((ar === 2 && ac === 1) || (ar === 1 && ac === 2)) return true;
+      return false;
+    case "M":
+      if (!(sr === r || sc === c)) return false;
+      let cnt = 0;
+      if (sr === r) {
+        const step = sc < c ? 1 : -1;
+        for (let i = sc + step; i !== c; i += step) if (board[sr][i]) cnt++;
+      } else {
+        const step = sr < r ? 1 : -1;
+        for (let i = sr + step; i !== r; i += step) if (board[i][sc]) cnt++;
+      }
+      if (board[r][c]) return cnt === 1 || cnt === 2;
+      return cnt === 0;
+    case "S": return (sr === r || sc === c) && Math.max(ar, ac) <= 5 && clearPath(sr, sc, r, c);
+    case "J":
+      if (!(sr === r || sc === c)) return false;
+      let b = 0;
+      if (sr === r) {
+        const st = sc < c ? 1 : -1;
+        for (let i = sc + st; i !== c; i += st) if (board[sr][i]) b++;
+      } else {
+        const st = sr < r ? 1 : -1;
+        for (let i = sr + st; i !== r; i += st) if (board[i][sc]) b++;
+      }
+      if (board[r][c]) return b === 1;
+      return b === 0;
+  }
+  return false;
+}
+drawGrid();
+drawPieces();
+</script>
+</body>
+</html>
