@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>测试网页</title>
+    <style>
+      body {
+        font-family: 'Microsoft YaHei', sans-serif;
+        background-color: #f0f2f5;
+        margin: 40px;
+        color: #333;
+      }
+      h1 {
+        color: #0078d7;
+        text-align: center;
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.6;
+      }
+      button {
+        background-color: #0078d7;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #005fa3;
+      }
+      table {
+        width: 60%;
+        margin: 20px auto;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border: 1px solid #aaa;
+        padding: 10px;
+        text-align: center;
+      }
+      th {
+        background-color: #e1e1e1;
+      }
+      img {
+        display: block;
+        margin: 20px auto;
+        border-radius: 10px;
+        width: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>欢迎来到测试网页</h1>
+    <p>这是一个用于测试 HTML、CSS 和 JavaScript 的示例网页。</p>
+
+    <button onclick="sayHello()">点我试试</button>
+
+    <img src="https://picsum.photos/300/200" alt="随机测试图片" />
+
+    <h2>示例表格</h2>
+    <table>
+      <tr>
+        <th>编号</th>
+        <th>名称</th>
+        <th>状态</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>测试项目 A</td>
+        <td>✅ 正常</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>测试项目 B</td>
+        <td>⚠️ 待检查</td>
+      </tr>
+    </table>
+
+    <script>
+      function sayHello() {
+        alert('你好！这是一个测试网页 😊');
+      }
+    </script>
+  </body>
+</html>
