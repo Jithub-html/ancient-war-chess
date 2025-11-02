@@ -15,16 +15,23 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
+.subtitle {
+  font-size: 28px;
+  color: #4a2c00;
+  margin-top: 10px;
+  margin-bottom: 15px;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
+  letter-spacing: 2px;
+}
 /* Title */
 h1 {
   font-size: 64px;
+  margin-top: 10px;
   margin: 40px 0 10px 0;
   color: #3a1e00;
   text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
   letter-spacing: 6px;
 }
-
 /* Return button */
 .back-btn {
   position: absolute;
@@ -43,6 +50,75 @@ h1 {
 .back-btn:hover {
   background: #ffe89c;
   transform: scale(1.05);
+}
+/* How-to-play button */
+.how-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #f7e4a8;
+  border: 3px solid #5b3a00;
+  border-radius: 12px;
+  padding: 10px 22px;
+  font-family: "KaiTi", serif;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.25);
+}
+.how-btn:hover {
+  background: #ffe89c;
+  transform: scale(1.05);
+}
+
+/* Popup overlay */
+#howto-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+/* Popup box */
+#howto-box {
+  background: #fdf3d3;
+  border: 5px solid #5a3a1a;
+  border-radius: 16px;
+  padding: 30px 40px;
+  width: 70%;
+  max-width: 700px;
+  font-size: 20px;
+  line-height: 1.8;
+  color: #3a1e00;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  text-align: left;
+}
+
+#howto-box h2 {
+  text-align: center;
+  margin-top: 0;
+  font-size: 28px;
+}
+
+#howto-box button {
+  display: block;
+  margin: 20px auto 0;
+  background: #d1a85c;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  font-size: 18px;
+  cursor: pointer;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+}
+#howto-box button:hover {
+  background: #f4c76a;
 }
 
 /* Board */
@@ -110,28 +186,60 @@ h1 {
 .selected {
   outline: 1mm solid black;
   box-shadow: 0 0 12px #c8a200; transform:scale(1.20); }
-}
-/* river */
+
 .river {
   position: absolute;
-  top: 360px;
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 24px;
+  top: calc(30px + 6 * 60px); /* o + 6*s, middle row */
+  left: calc(30px + 5 * 60px); /* o + 5*s, middle column */
+  transform: translate(-50%, -50%);
+  font-size: 28px;
   color: #654321;
-  pointer-events: none;
   letter-spacing: 10px;
+  font-weight: bold;
+  text-align: center;
+  pointer-events: none;
+  z-index: 5;
 }
+
+
 </style>
 </head>
 
 <body>
 <button class="back-btn" onclick="location.href='homepage.html'">返回主页</button>
+<button class="how-btn" onclick="toggleHowToPlay()">?</button>
 <h1>古代战棋</h1>
-<div id="board"></div>
+<p class="subtitle">Ancient War Chess</p>
+<div id="board">
+  <div class="river">黄河               边界</div>
+</div>
+<!-- How-to-play Popup -->
+<div2 id="howto-overlay">
+  <div id="howto-box">
+    <h2>How To Play</h2>
+    <p>古代战棋融合了中国象棋与战略战棋元素。</p>
+    <ul>
+    <li><strong>兵 / 卒 (Pawn):</strong> Moves 1 step forward. After crossing the river (middle of the board), it can move 1 step forward, left, or right (but not backward).</li>
+    <li><strong>剑 (Arrow):</strong> Moves any number of steps in the four directions (up, down, left, right). It captures by jumping over exactly 1 piece.</li>
+    <li><strong>军 (Soldier):</strong> Moves up to 5 steps in the four directions (up, down, left, right).</li>
+    <li><strong>炮 / 砲 (Cannon):</strong> Moves any number of steps in the four directions. Captures by jumping over 1 or 2 pieces.</li>
+    <li><strong>車 / 俥 (Chariot / Rook):</strong> Moves any number of steps in the four directions (like the rook in chess).</li>
+    <li><strong>马 / 傌 (Horse):</strong> Moves in L-shapes (2 + 1) or 2-step straight moves in any direction.</li>
+    <li><strong>相 / 象 (Elephant):</strong> Moves 2 steps diagonally (田-shaped) or 2-step straight moves. Cannot cross the river for normal diagonal move.</li>
+    <li><strong>虎 / 狮 (Tiger / Lion):</strong> Can move 1 or 2 steps in any direction within a 2x2 square.</li>
+    <li><strong>仕 / 士 (Advisor / Guard):</strong> Moves any number of steps diagonally, vertically, or horizontally.</li>
+    <li><strong>将 / 帥 (King / General):</strong> Moves 1 step in any direction. The goal is to capture the opponent's King.</li>
+  </ul>
+    <button onclick="toggleHowToPlay()">Close</button>
+  </div>
+</div2>
 
 <script>
+function toggleHowToPlay() {
+  const overlay = document.getElementById("howto-overlay");
+  overlay.style.display = (overlay.style.display === "flex") ? "none" : "flex";
+}
+
 const boardEl = document.getElementById("board"),
       s = 60, o = 30;
 let turn = "r", sel = null;
@@ -161,7 +269,7 @@ const sym = {
   rJ:"剑", bJ:"剑",
   rP:"兵", bP:"卒",
   rS:"军", bS:"军",
-  rM:"炮", bM:"炮",
+  rM:"炮", bM:"砲",
   rH:"虎", bH:"狮"
 };
 
@@ -198,26 +306,6 @@ function drawGrid() {
     }
     boardEl.appendChild(v);
   }
-
-  // palaces
-  const palaceTop = document.createElement("div");
-  palaceTop.className = "palace";
-  palaceTop.style.left = (o + 4 * s) + "px";
-  palaceTop.style.top = o + "px";
-  boardEl.appendChild(palaceTop);
-
-  const palaceBottom = document.createElement("div");
-  palaceBottom.className = "palace";
-  palaceBottom.style.left = (o + 4 * s) + "px";
-  palaceBottom.style.top = (o + (rows - 4) * s) + "px";
-  boardEl.appendChild(palaceBottom);
-
-  // river
-  const river = document.createElement("div");
-  river.className = "river";
-  river.textContent = "楚河              汉界";
-  boardEl.appendChild(river);
-
   // intersections
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
